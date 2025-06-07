@@ -1,0 +1,138 @@
+Stylo Language Specification (Python/BASIC-Like Syntax)
+1. First-Class Token Support
+
+Tokens in Stylo are akin to variables, but are specifically designed for UI elements like colors, dimensions, fonts, etc.
+
+They are declared using the TOKEN keyword and can be manipulated just like any variable.
+
+stylo
+Copy
+Edit
+TOKEN primaryColor = "#3498db"      // Define a color token
+TOKEN secondaryColor = "#2ecc71"    // Define another color token
+TOKEN fontSize = 16                 // Define a font size token
+TOKEN themeSpacing = 8              // Define spacing token
+2. Token Usage in Styles
+
+Tokens can be directly referenced within the style rules or component definitions.
+
+stylo
+Copy
+Edit
+// Using tokens in styles
+STYLE button {
+    backgroundColor = primaryColor
+    fontSize = fontSize
+    padding = themeSpacing
+}
+3. Theming Support
+
+Themes are defined using a simple THEME keyword, with support for multiple named themes (e.g., "light", "dark").
+
+The @theme directive toggles between light and dark mode styles automatically.
+
+stylo
+Copy
+Edit
+// Defining light mode theme
+THEME light {
+    primaryColor = "#3498db"
+    backgroundColor = "#ffffff"
+}
+
+// Defining dark mode theme
+THEME dark {
+    primaryColor = "#1abc9c"
+    backgroundColor = "#2c3e50"
+}
+4. Component Styles & Nesting
+
+Components can be defined with styles scoped within them, and nested structures are allowed.
+
+This syntax is more akin to BASIC's structured blocks or Python's indentation, so it's clean and readable.
+
+stylo
+Copy
+Edit
+// Button component styles
+COMPONENT button {
+    backgroundColor = primaryColor
+    fontSize = fontSize
+    padding = themeSpacing
+}
+
+// Nested styling within a component
+COMPONENT card {
+    borderColor = "#e0e0e0"
+    borderWidth = 1
+    padding = 16
+
+    COMPONENT header {
+        fontSize = 18
+        color = "#333333"
+    }
+}
+5. Functions & Expressions
+
+Simple expressions and basic operations can be used to modify token values or perform calculations.
+
+Functions (like lighten, darken, etc.) can also be defined or imported, adding flexibility.
+
+stylo
+Copy
+Edit
+// Arithmetic operations on tokens
+TOKEN scaledSpacing = themeSpacing * 2     // Double the spacing token
+TOKEN newColor = lighten(primaryColor, 10)  // Lighten the primary color by 10%
+6. If Statements / Conditional Logic
+
+Basic control flow like if-else can be used to modify styles based on conditions (e.g., user preferences, theme state).
+
+stylo
+Copy
+Edit
+IF theme == "dark" {
+    primaryColor = "#1abc9c"
+    backgroundColor = "#2c3e50"
+} ELSE {
+    primaryColor = "#3498db"
+    backgroundColor = "#ffffff"
+}
+7. Simple Imports & Extensibility
+
+Just like Python’s import statement, Stylo can import predefined tokens or functions from external libraries or shared files.
+
+stylo
+Copy
+Edit
+// Importing common tokens and functions
+IMPORT tokens from "themeDefaults.stylo"
+IMPORT utils from "styloUtils.stylo"
+
+// Using imported tokens
+TOKEN defaultPadding = tokens.largeSpacing
+8. Output Generation
+
+The transpiler will output standard CSS, which could then be used directly in the project.
+
+stylo
+Copy
+Edit
+// Stylo will transpile this to CSS
+COMPONENT button {
+    background-color: #3498db;
+    font-size: 16px;
+    padding: 8px;
+}
+Key Features
+Readable and Intuitive Syntax: Like Python or BASIC, Stylo's syntax focuses on clarity and simplicity.
+
+First-Class Tokens: Tokens are core to the language, offering a flexible, scalable approach to managing UI elements like colors, fonts, and layout values.
+
+Easy Theming: Switching themes is a breeze with the THEME keyword, allowing developers to maintain a consistent look and feel across different modes (e.g., dark vs. light).
+
+Modular: Supports importing shared style rules and functions across projects or components.
+
+Conditional Logic: Basic if statements allow for dynamic styling based on conditions like theme selection.
+
+Tooling Integration: Tooling support for syntax highlighting, autocompletion, and linting in VS Code and other IDEs.
