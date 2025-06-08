@@ -4,6 +4,7 @@ import { Token } from './lexer.models';
 import { ColorPropertyRule } from './color-property.rule';
 import { BackgroundColorPropertyRule } from './background-color-property.rule';
 import { HexColorValueRule } from './hex-color-value.rule';
+import { CommentRule } from './comment.rule';
 
 export function lexer(input: string): Token {
   const tokenTreeRoot: Token = new Token('root', '', -1, true);
@@ -11,6 +12,7 @@ export function lexer(input: string): Token {
     return tokenTreeRoot;
 
   const rules: LexerRule[] = [
+    new CommentRule(),
     new ClassSelectorRule(),
     new ColorPropertyRule(),
     new BackgroundColorPropertyRule(),

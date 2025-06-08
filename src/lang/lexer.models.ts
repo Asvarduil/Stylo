@@ -1,4 +1,4 @@
-export type SymbolTypes = 'root'|'blank'|'selector'|'property'|'value'|'state';
+export type SymbolTypes = 'root'|'comment'|'selector'|'property'|'value'|'state';
 
 export class Token {
     type: SymbolTypes;

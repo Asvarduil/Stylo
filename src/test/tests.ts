@@ -6,17 +6,38 @@ import { Token } from '../lang/lexer.models';
 import { ClassSelectorRule } from "../lang/class-selector.rule";
 import { ColorPropertyRule } from "../lang/color-property.rule";
 import { HexColorValueRule } from "../lang/hex-color-value.rule";
+import { CommentRule } from "../lang/comment.rule";
 
 class TestCases {
-  private simpleExample: string = `.button
+  private simpleExample: string = `
+// This is the simplest Stylo example possible
+.button
   color is #FEFEFE
-  background-color is #336699`;
+  background-color is #336699
+`;
 
   runTests() {
+    this.canIdentifyComment();
     this.canIdentifyClassSelector();
     this.canIdentifyColorPropertyAndValue();
     this.canExtractTokens();
     // this.canExtractPropertiesToAST();
+  }
+
+  private canIdentifyComment() {
+    // GIVEN a comment line starting with //
+    // WHEN I pass this line to the comment rule
+    // THEN undefined is returned, because this should be ignored by the language.
+    const stylo = '// This is a comment!';
+    const commentRule = new CommentRule();
+
+    const token = commentRule.checkRule(stylo);
+
+    const canIdentifyComment = token == undefined;
+    if (canIdentifyComment)
+      console.info('[SUCCESS] Can identify a comment!');
+    else
+      console.info('Could not identify a comment by the // token');
   }
 
   private canIdentifyClassSelector() {
