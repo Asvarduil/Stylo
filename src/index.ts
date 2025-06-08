@@ -1,7 +1,7 @@
 // src/index.ts
-import { lexer } from "./lang/lexer";
-import { parse } from "./compiler/parser";
-import { transform } from "./compiler/transformer";
+import { lexer } from "@lang/lexer";
+import { Parser } from "@compiler/parser";
+import { transform } from "@compiler/transformer";
 
 // const input = `.button
 //   color is #FEFEFE
@@ -20,7 +20,9 @@ const input = `
 const tokens = lexer(input);
 console.log("Tokens:", tokens);
 
-const ast = parse(input);
+const parser = new Parser(input);
+parser.parseBlob();
+const ast = parser.AST;
 console.log("AST:", JSON.stringify(ast, null, 2));
 
 const css = transform(ast);

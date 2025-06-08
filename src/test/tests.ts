@@ -1,12 +1,12 @@
-import { lexer } from "../lang/lexer";
-import { Parser } from "../compiler/parser";
-import { transform } from "../compiler/transformer";
+import { lexer } from "@lang/lexer";
+import { Parser } from "@compiler/parser";
+import { transform } from "@compiler/transformer";
 
-import { Token } from '../lang/lexer.models';
-import { ClassSelectorRule } from "../lang/class-selector.rule";
-import { ColorPropertyRule } from "../lang/color-property.rule";
-import { HexColorValueRule } from "../lang/hex-color-value.rule";
-import { CommentRule } from "../lang/comment.rule";
+import { Token } from '@lang/lexer.models';
+import { ClassSelectorRule } from "@lang/class-selector.rule";
+import { ColorPropertyRule } from "@lang/color-property.rule";
+import { HexColorValueRule } from "@lang/hex-color-value.rule";
+import { CommentRule } from "@lang/comment.rule";
 
 class TestCases {
   private simpleExample: string = `
