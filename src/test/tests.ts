@@ -16,6 +16,22 @@ class TestCases {
   background-color is #336699
 `;
 
+  private success(message: string, ...args: any[]) {
+    const successStyle = "color: #CCFFCC; background-color: #339966;";
+    const msgArgs = args && args.length > 0
+      ? [...args].push(successStyle) 
+      : [successStyle];
+    console.info(`%c [SUCCESS] ${message}`, msgArgs);
+  }
+
+  private failure(message: string, ...args: any[]) {
+    let errorStyle = "color: #FFCCCC; background-color: #993333;";
+    const msgArgs = args && args.length > 0
+      ? [...args].push(errorStyle)
+      : [errorStyle]
+    console.error(`%c [FAILURE] ${message}`, errorStyle, args);
+  }
+
   runTests() {
     this.canIdentifyComment();
     this.canIdentifyClassSelector();
@@ -35,9 +51,9 @@ class TestCases {
 
     const canIdentifyComment = token == undefined;
     if (canIdentifyComment)
-      console.info('[SUCCESS] Can identify a comment!');
+      this.success('Can identify a comment!');
     else
-      console.info('Could not identify a comment by the // token');
+      this.failure('Could not identify a comment by the // token');
   }
 
   private canIdentifyClassSelector() {
@@ -51,9 +67,9 @@ class TestCases {
 
     const canIdentifySelector = token && token.type === 'selector' && token.value === '.button' && token.indentLevel === 0;
     if (!canIdentifySelector)
-      console.error('Class selector not recognized >', stylo, token);
+      this.failure('Class selector not recognized >', stylo, token);
     else
-      console.info('[SUCCESS] The class selection rule can identify class selectors.');
+      this.success('Can identify class selectors.');
   }
 
   private canIdentifyColorPropertyAndValue() {
@@ -67,21 +83,21 @@ class TestCases {
       new HexColorValueRule()
     ];
 
-    const tokens: (Token | undefined )[] = rules.map(m => m.checkRule(stylo));
+    const tokens: (Token | undefined)[] = rules.map(m => m.checkRule(stylo));
 
     const hasColorPropertyRule = tokens.find(t => !!t && t.type === 'property' && t.value === 'color');
     const hasHexColorValueRule = tokens.find(t => !!t && t.type === 'value' && t.value === '#FEFEFE');
     const hasFoundBothTokens = hasColorPropertyRule && hasHexColorValueRule;
 
     if (hasFoundBothTokens) {
-      console.info('[SUCCESS] Can correctly identify the color property and its hex value');
+      this.success('Can correctly identify the color property and its hex value');
       return;
     }
 
     if (!hasColorPropertyRule)
-      console.error('Could not find color property token >', stylo, tokens);
+      this.failure('Could not find color property token >', stylo, tokens);
     if (!hasHexColorValueRule)
-      console.error('Could not find color property hex value token >', stylo, tokens);
+      this.failure('Could not find color property hex value token >', stylo, tokens);
   }
 
   private canExtractTokens() {
@@ -102,18 +118,18 @@ class TestCases {
     let isPropertyCountCorrect = propertyTokens?.length === expectedPropertyCount;
 
     if (!isSelectorCountCorrect)
-        console.error('Selector count defies expectations:', 
-          { expected: expectedSelectorCount}, 
-          {found: selectorTokens?.length}
+        this.failure('Selector count defies expectations:', 
+          { expected: expectedSelectorCount }, 
+          { found: selectorTokens?.length }
         );
     if (!isPropertyCountCorrect)
-        console.error('Property count defies expectations:', 
+        this.failure('Property count defies expectations:', 
             { expected: expectedPropertyCount}, 
-            {found: propertyTokens?.length}
+            { found: propertyTokens?.length }
         );
 
     if (isSelectorCountCorrect && isPropertyCountCorrect)
-        console.info('[SUCCESS] Can Extract Tokens');
+        this.success('Can extract tokens');
   }
 
   private canExtractPropertiesToAST() {
@@ -132,14 +148,14 @@ class TestCases {
     let isPropertyCountCorrect = ast.rules[0].properties.length == expectedPropertyCount;
 
     if (!isPropertyCountCorrect)
-        console.error('Property count defies expectations:', 
-            { expected: expectedPropertyCount}, 
-            {found: ast.rules[0].properties.length}, 
+        this.failure('Property count defies expectations:', 
+            { expected: expectedPropertyCount }, 
+            {found: ast.rules[0].properties.length }, 
             ast
         );
 
     if (isPropertyCountCorrect)
-        console.info('[SUCCESS] Can extract properties to AST');
+        this.success('Can extract properties to AST');
   }
 }
 
