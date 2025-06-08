@@ -29,7 +29,7 @@ class TestCases {
     const msgArgs = args && args.length > 0
       ? [...args].push(errorStyle)
       : [errorStyle]
-    console.error(`%c [FAILURE] ${message}`, errorStyle, args);
+    console.error(`%c [FAILURE] ${message}`, msgArgs);
   }
 
   runTests() {
