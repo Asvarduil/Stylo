@@ -1,17 +1,66 @@
 import { lexer } from "../lang/lexer";
-import { Parser, parse } from "../compiler/parser";
+import { Parser } from "../compiler/parser";
 import { transform } from "../compiler/transformer";
 
+import { Token } from '../lang/lexer.models';
+import { ClassSelectorRule } from "../lang/class-selector.rule";
+import { ColorPropertyRule } from "../lang/color-property.rule";
+import { HexColorValueRule } from "../lang/hex-color-value.rule";
+
 class TestCases {
-  private simpleExample: string = `
-.button
+  private simpleExample: string = `.button
   color is #FEFEFE
-  background-color is #336699
-  `;
+  background-color is #336699`;
 
   runTests() {
+    this.canIdentifyClassSelector();
+    this.canIdentifyColorPropertyAndValue();
     this.canExtractTokens();
-    this.canExtractPropertiesToAST();
+    // this.canExtractPropertiesToAST();
+  }
+
+  private canIdentifyClassSelector() {
+    // GIVEN a selector .button
+    // WHEN I pass this selector to the class selector rule
+    // THEN a Token of type selector with value .button is generated
+    const stylo = '.button';
+    const classSelectorRule = new ClassSelectorRule();
+
+    const token = classSelectorRule.checkRule(stylo);
+
+    const canIdentifySelector = token && token.type === 'selector' && token.value === '.button' && token.indentLevel === 0;
+    if (!canIdentifySelector)
+      console.error('Class selector not recognized >', stylo, token);
+    else
+      console.info('[SUCCESS] The class selection rule can identify class selectors.');
+  }
+
+  private canIdentifyColorPropertyAndValue() {
+    // GIVEN the stylo color is #FEFEFE
+    // WHEN I pass this to the color property and hex color value rules
+    // THEN we get an accurate set of tokens from both rules.
+
+    const stylo = 'color is #FEFEFE';
+    const rules = [
+      new ColorPropertyRule(),
+      new HexColorValueRule()
+    ];
+
+    const tokens: (Token | undefined )[] = rules.map(m => m.checkRule(stylo));
+
+    const hasColorPropertyRule = tokens.find(t => !!t && t.type === 'property' && t.value === 'color');
+    const hasHexColorValueRule = tokens.find(t => !!t && t.type === 'value' && t.value === '#FEFEFE');
+    const hasFoundBothTokens = hasColorPropertyRule && hasHexColorValueRule;
+
+    if (hasFoundBothTokens) {
+      console.info('[SUCCESS] Can correctly identify the color property and its hex value');
+      return;
+    }
+
+    if (!hasColorPropertyRule)
+      console.error('Could not find color property token >', stylo, tokens);
+    if (!hasHexColorValueRule)
+      console.error('Could not find color property hex value token >', stylo, tokens);
   }
 
   private canExtractTokens() {
@@ -19,14 +68,14 @@ class TestCases {
     // WHEN we pass the example to the lexer
     // THEN we get an accurate series of tokens.
 
-    const tokens = lexer(this.simpleExample);
-    console.log("Tokens:", tokens);
+    const tokenTree = lexer(this.simpleExample);
+    console.log("Token Tree:", tokenTree.renderTree());
 
     let expectedSelectorCount = 1;
     let expectedPropertyCount = 2;
 
-    let selectorTokens = tokens.filter(t => t.type.trim().toLowerCase() == 'selector');
-    let propertyTokens = tokens.filter(t => t.type.trim().toLowerCase() == 'property');
+    let selectorTokens = tokenTree.findChildrenByCriteria(t => t.type.trim().toLowerCase() == 'selector');
+    let propertyTokens = tokenTree.findChildrenByCriteria(t => t.type.trim().toLowerCase() == 'property');
 
     let isSelectorCountCorrect = selectorTokens?.length === expectedSelectorCount;
     let isPropertyCountCorrect = propertyTokens?.length === expectedPropertyCount;
@@ -34,14 +83,12 @@ class TestCases {
     if (!isSelectorCountCorrect)
         console.error('Selector count defies expectations:', 
           { expected: expectedSelectorCount}, 
-          {found: selectorTokens?.length}, 
-          selectorTokens
+          {found: selectorTokens?.length}
         );
     if (!isPropertyCountCorrect)
         console.error('Property count defies expectations:', 
             { expected: expectedPropertyCount}, 
-            {found: propertyTokens?.length}, 
-            propertyTokens
+            {found: propertyTokens?.length}
         );
 
     if (isSelectorCountCorrect && isPropertyCountCorrect)

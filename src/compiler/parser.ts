@@ -1,21 +1,22 @@
 // src/compiler/parser.ts
-import { lexer, Token } from "../lang/lexer";
-import { AST, ASTRule, ASTProperty } from './types';
+import { lexer } from "../lang/lexer";
+import { Token } from "../lang/lexer.models";
+import { AST, ASTRule, ASTProperty } from './AST.models';
 
 export class Parser {
-    tokens: Token[] = [];
+    tokenTree: Token = new Token('root', '', -1);
     AST: AST = new AST();
 
     private currentRule?: ASTRule | null;
     private currentProperty?: string | null;
 
     constructor(input: string) {
-        this.tokens = lexer(input);
+        this.tokenTree = lexer(input);
     }
 
     parseBlob() {
         let lastIndentationLevel = 0;
-        for (const current of this.tokens) {
+        for (const current of this.tokenTree.children) {
             const indentationLevel = current.value.match(/^ */)?.[0].length || 0;
             console.info('Last vs. current indentation level:', lastIndentationLevel, indentationLevel);
 
@@ -59,14 +60,14 @@ export class Parser {
 }
 
 export function parse(input: string) {
-  const tokens = lexer(input);
+  const tokenTree = lexer(input);
   const ast: AST = new AST();
   let currentRule: ASTRule | null = null;
   let currentProperty: string | null = null;
 
   let lastIndentationLevel = 0; // Keep track of indentation level
 
-  for (const token of tokens) {
+  for (const token of tokenTree.children) {
     // Check for indentation based on the leading spaces (assuming 2 spaces per indent)
     const indentationLevel = token.value.match(/^ */)?.[0].length || 0;
 

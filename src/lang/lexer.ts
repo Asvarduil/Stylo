@@ -1,26 +1,44 @@
-// src/lang/lexer.ts
-export type Token =
-  | { type: "selector"; value: string }
-  | { type: "property"; value: string }
-  | { type: "value"; value: string }
-  | { type: "state"; value: string };
+import { LexerRule } from './lexer-rule.base';
+import { ClassSelectorRule } from './class-selector.rule';
+import { Token } from './lexer.models';
+import { ColorPropertyRule } from './color-property.rule';
+import { BackgroundColorPropertyRule } from './background-color-property.rule';
+import { HexColorValueRule } from './hex-color-value.rule';
 
-export function lexer(input: string): Token[] {
-  const regex = /(\.[a-zA-Z0-9_-]+)|(\b(color|background-color)\b)|(#([0-9a-fA-F]{6}|[0-9a-fA-F]{3}))|(\b(on \w+)\b)/g;
-  const tokens: Token[] = [];
-  let match: RegExpExecArray | null;
+export function lexer(input: string): Token {
+  const tokenTreeRoot: Token = new Token('root', '', -1, true);
+  if (!input || input.length === 0)
+    return tokenTreeRoot;
 
-  while ((match = regex.exec(input))) {
-    if (match[1]) {
-      tokens.push({ type: "selector", value: match[1] });
-    } else if (match[2]) {
-      tokens.push({ type: "property", value: match[2] });
-    } else if (match[3]) {
-      tokens.push({ type: "value", value: match[3] });
-    } else if (match[4]) {
-      tokens.push({ type: "state", value: match[4] });
+  const rules: LexerRule[] = [
+    new ClassSelectorRule(),
+    new ColorPropertyRule(),
+    new BackgroundColorPropertyRule(),
+    new HexColorValueRule()
+  ];
+
+  let currentAncestor: Token = tokenTreeRoot;
+  
+  const lines: string[] = input.split('\n');
+
+  for (let current of lines) {
+    const tokens = rules
+      .map(r => r.checkRule(current))
+      .filter(m => m != undefined);
+
+    if (!tokens || tokens.length === 0)
+      continue;
+
+    currentAncestor.children.push(...tokens);
+
+    // We should switch to the most recent ancestor IF...
+    //   1. Current ancestor can have children.
+    //   2. Current indent level is bigger than last indent level
+    const lastToken = tokens[tokens.length - 1];
+    if (lastToken.canHaveChildren && (lastToken.indentLevel > currentAncestor.indentLevel)) {
+      currentAncestor = lastToken;
     }
   }
 
-  return tokens;
+  return tokenTreeRoot;
 }
