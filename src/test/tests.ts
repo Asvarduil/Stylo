@@ -7,6 +7,7 @@ import { ClassSelectorRule } from "@lang/class-selector.rule";
 import { ColorPropertyRule } from "@lang/color-property.rule";
 import { HexColorValueRule } from "@lang/hex-color-value.rule";
 import { CommentRule } from "@lang/comment.rule";
+import { IsOperatorRule } from "src/lang/is-operator.rule";
 
 class TestCases {
   private simpleExample: string = `
@@ -79,21 +80,25 @@ class TestCases {
 
     const stylo = 'color is #FEFEFE';
     const rules = [
+      new IsOperatorRule(),
       new ColorPropertyRule(),
       new HexColorValueRule()
     ];
 
     const tokens: (Token | undefined)[] = rules.map(m => m.checkRule(stylo));
 
+    const hasIsOperatorRule = tokens.find(t => !!t && t.type === 'operator' && t.value === ' is ');
     const hasColorPropertyRule = tokens.find(t => !!t && t.type === 'property' && t.value === 'color');
     const hasHexColorValueRule = tokens.find(t => !!t && t.type === 'value' && t.value === '#FEFEFE');
-    const hasFoundBothTokens = hasColorPropertyRule && hasHexColorValueRule;
+    const hasFoundTokens = hasIsOperatorRule && hasColorPropertyRule && hasHexColorValueRule;
 
-    if (hasFoundBothTokens) {
-      this.success('Can correctly identify the color property and its hex value');
+    if (hasFoundTokens) {
+      this.success('Can correctly identify the color property, its hex value, and the assignment operator');
       return;
     }
 
+    if (!hasIsOperatorRule)
+      this.failure('Could not find is operator token >', stylo, tokens);
     if (!hasColorPropertyRule)
       this.failure('Could not find color property token >', stylo, tokens);
     if (!hasHexColorValueRule)
@@ -110,12 +115,15 @@ class TestCases {
 
     let expectedSelectorCount = 1;
     let expectedPropertyCount = 2;
+    let expectedOperatorCount = 2;
 
     let selectorTokens = tokenTree.findChildrenByCriteria(t => t.type.trim().toLowerCase() == 'selector');
     let propertyTokens = tokenTree.findChildrenByCriteria(t => t.type.trim().toLowerCase() == 'property');
+    let operatorTokens = tokenTree.findChildrenByCriteria(t => t.type.trim().toLowerCase() == 'operator');
 
     let isSelectorCountCorrect = selectorTokens?.length === expectedSelectorCount;
     let isPropertyCountCorrect = propertyTokens?.length === expectedPropertyCount;
+    let isOperatorCountCorrect = operatorTokens?.length === expectedOperatorCount;
 
     if (!isSelectorCountCorrect)
         this.failure('Selector count defies expectations:', 
@@ -127,8 +135,13 @@ class TestCases {
             { expected: expectedPropertyCount}, 
             { found: propertyTokens?.length }
         );
+    if (!isOperatorCountCorrect)
+        this.failure('Operator count defies expectations:',
+            { expected: expectedOperatorCount },
+            { found: operatorTokens?.length }
+        );
 
-    if (isSelectorCountCorrect && isPropertyCountCorrect)
+    if (isSelectorCountCorrect && isPropertyCountCorrect && isOperatorCountCorrect)
         this.success('Can extract tokens');
   }
 
