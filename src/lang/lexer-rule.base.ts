@@ -1,7 +1,8 @@
-import { Token } from './lexer.models';
+import { SymbolTypes, Token } from './lexer.models';
 
 export abstract class LexerRule {
     debugMode: boolean = true;
+    protected abstract ruleType: SymbolTypes;
     abstract regex: RegExp;
 
     getIndentLevel(input: string) {
@@ -18,5 +19,13 @@ export abstract class LexerRule {
         console.info(message, args);
     }
 
-    abstract checkRule(input: string): Token | undefined;
+    checkRule(input: string): Token | undefined {
+        const value: RegExpExecArray | null = this.regex.exec(input.trim());
+        if (!value)
+            return undefined;
+
+        const indentLevel = this.getIndentLevel(input);
+        const result = new Token(this.ruleType, value[0], indentLevel);
+        return result;
+    }
 }

@@ -1,8 +1,9 @@
 import { LexerRule } from "./lexer-rule.base";
-import { Token } from "./lexer.models";
+import { SymbolTypes, Token } from "./lexer.models";
 
 export class CommentRule extends LexerRule {
     regex = /^\/\/.*/;
+    ruleType: SymbolTypes = 'comment';
 
     checkRule(input: string): Token | undefined {
         const keywordUse: RegExpMatchArray | null = this.regex.exec(input.trim())
