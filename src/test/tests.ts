@@ -150,8 +150,7 @@ class TestCases {
     // AND that the lexer creates a token set
     // WHEN we call the parser
     // THEN an AST is created that faithfully represents the token hierarchy
-    // const ast = parse(this.simpleExample);
-    // console.log("AST:", JSON.stringify(ast, null, 2));
+
     const parser = new Parser(this.simpleExample);
     parser.parseBlob();
     const ast = parser.AST;
